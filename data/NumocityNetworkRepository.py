@@ -2,7 +2,7 @@ from typing import List
 from data.IStationInfoRepository import IStationInfoReposity
 from models.StationBasicInfo import StationBasicInfo
 from network.NumocityApiService import NumocityApiService
-from typing import List
+from typing import List, Dict
 
 
 class NetworkNumocityRepository(IStationInfoReposity):
@@ -24,20 +24,25 @@ class NetworkNumocityRepository(IStationInfoReposity):
         for station in rawList
     ]
 
-    def getStationInfo(self, stationId):
+    def getStationInfo(self, stationId)-> Dict[str,Dict[str, Dict[str, int]]]:
         token= self.getToken()
         connectors= self.apiService.get_station_info(token, stationId)
-        connectorMap = {}
+        # group connectors by connectorType and powerModel
+        connectorDict= {}
         for connector in connectors:
-            key = f"{connector.connectorType}_{connector.connectorModelPower}"
-            if key not in connectorMap:
-                connectorMap[key] = {}
-            statusConnectors = connectorMap[key]
-            status = connector.ComputedStatus
-            if status not in statusConnectors:
-                statusConnectors[status] = 0
-            statusConnectors[status] += 1
-        return connectorMap
-
+            # check if connectorDict contains a key of connctor.connectorType
+            if connector.connectorType not in connectorDict:
+                connectorDict[connector.connectorType]= {}
+            # check if connectorDict[connector.connectorType] contains a key of connector.connectorModelPower
+            if connector.connectorModelPower not in connectorDict[connector.connectorType]:
+                connectorDict[connector.connectorType][connector.connectorModelPower]= {}
+            # check if connectorDict[connector.connectorType][connector.connectorModelPower] contains a key of connector.ComputedStatus
+            if connector.ComputedStatus not in connectorDict[connector.connectorType][connector.connectorModelPower]:
+                connectorDict[connector.connectorType][connector.connectorModelPower][connector.ComputedStatus]= 0
+            
+            connectorDict[connector.connectorType][connector.connectorModelPower][connector.ComputedStatus]+= 1
+        
+        return connectorDict
+  
     def getToken(self) -> str:
         return "Bearer "+ self.apiService.get_token().Document.GlobalJwtToken
