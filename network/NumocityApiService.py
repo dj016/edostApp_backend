@@ -1,3 +1,5 @@
+from ast import Str
+import time
 import requests
 from pydantic import BaseModel
 from typing import List
@@ -30,11 +32,18 @@ class NumocityApiService:
     def __init__(self, base_url: str, cpo_name: str):
         self.base_url = base_url
         self.cpo_name = cpo_name
+        self.token= None
+        self.tokenRenewTime= None
 
     def get_token(self) -> NumocityTokenResponse:
-        response = requests.get(f"{self.base_url}/token/admin/v1/requesttoken/449a164913fc3e683194c7d5eded732c")
-        response.raise_for_status()
-        return NumocityTokenResponse.parse_obj(response.json())
+        # time greather than last hour
+
+        if(self.token== None or self.tokenRenewTime< time.time()-3600):
+            response = requests.get(f"{self.base_url}/token/admin/v1/requesttoken/449a164913fc3e683194c7d5eded732c")
+            response.raise_for_status()
+            self.token= NumocityTokenResponse.parse_obj(response.json())
+            self.tokenRenewTime= time.time()
+        return self.token
 
     def get_all_stations(self, authorization: str)-> List[NumocityStation]:
         headers = {"authorization": authorization}
@@ -45,6 +54,6 @@ class NumocityApiService:
     def get_station_info(self, authorization: str, station_id: str)-> List[NumocityConnector]:
         headers = {"authorization": authorization}
         params = {"ChargeStationID": station_id}
-        response = requests.get(f"{self.base_url}asset/mobile/get-connector-info?numotype=ocpp", headers=headers, params=params)
+        response = requests.get(f"{self.base_url}/asset/mobile/get-connector-info?numotype=ocpp", headers=headers, params=params)
         response.raise_for_status()
         return [NumocityConnector.parse_obj(connector) for connector in response.json()]

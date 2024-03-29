@@ -7,3 +7,7 @@ class StationBasicInfo(BaseModel):
     latitude: float
     stationID: str
     accessType: str
+
+class StationCompleteInfo(BaseModel):
+    stationBasicInfo: StationBasicInfo
+    connectors: dict[str,dict[str, dict[str, int]]]
