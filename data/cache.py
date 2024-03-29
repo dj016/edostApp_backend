@@ -1,4 +1,4 @@
-from typing import List
+from typing import Dict, List
 from network.NumocityApiService import NumocityApiService
 from models.StationBasicInfo import StationBasicInfo
 from data.NumocityNetworkRepository import NetworkNumocityRepository
@@ -48,7 +48,7 @@ class cache():
             self.refreshData()
         return self.data
 
-    def getStationInfo(self, cpoName: str, stationId: str) -> dict[str, dict[str, dict[str, int]]]:
+    def getStationInfo(self, cpoName: str, stationId: str) -> Dict[str, Dict[str, Dict[str, int]]]:
         if (cpoName == "relux"):
             return self.reluxNetworkRepository.getStationInfo(stationId)
         elif (cpoName == "kurrent charge"):
