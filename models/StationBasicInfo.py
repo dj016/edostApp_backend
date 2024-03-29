@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Dict
 
 class StationBasicInfo(BaseModel):
     cpoName: str
@@ -10,4 +11,4 @@ class StationBasicInfo(BaseModel):
 
 class StationCompleteInfo(BaseModel):
     stationBasicInfo: StationBasicInfo
-    connectors: dict[str,dict[str, dict[str, int]]]
+    connectors: Dict[str,Dict[str, Dict[str, int]]]
